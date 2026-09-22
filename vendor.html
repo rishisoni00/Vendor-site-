@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ambe Alankaar | Vendor Portal</title>
+  <link rel="stylesheet" href="vendor-style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Main Vendor Shell -->
+  <div class="vendor-layout">
+    
+    <!-- Left Sidebar -->
+    <aside class="vendor-sidebar">
+      <div class="brand-header">
+        <svg viewBox="0 0 100 100" class="site-logo">
+          <circle cx="50" cy="50" r="42" stroke="#004d25" stroke-width="4" fill="none"/>
+          <path d="M50 20 L80 80 L65 80 L50 48 L35 80 L20 80 Z" fill="#D4AF37"/>
+        </svg>
+        <div>
+          <h3>AMBE ALANKAAR</h3>
+          <span class="sub-title">VENDOR PORTAL</span>
+        </div>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="active">📊 Dashboard</li>
+        <li>📋 Booking Requests <span class="badge" id="pendingCountBadge">0</span></li>
+        <li>📦 Orders</li>
+        <li>💳 Payments</li>
+        <li>👥 Customers</li>
+        <li>💎 Products</li>
+        <li>📈 Analytics</li>
+        <li>🔔 Notifications <span class="badge">2</span></li>
+        <li>⚙️ Settings</li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <p>🔒 Logged in as: <strong>Admin</strong></p>
+      </div>
+    </aside>
+
+    <!-- Main Right Content Area -->
+    <main class="vendor-main">
+      
+      <!-- Top Navbar -->
+      <header class="vendor-header">
+        <h2>Dashboard Overview</h2>
+        <div class="admin-profile">
+          <span>🔔</span>
+          <div class="avatar">V</div>
+          <span>Vendor Admin <br><small>Super Admin</small></span>
+        </div>
+      </header>
+
+      <!-- KPI Stat Cards Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h4>Pending Requests</h4>
+          <div class="stat-value" id="statPendingCount">0</div>
+          <a href="#requests-section">View Details →</a>
+        </div>
+        <div class="stat-card">
+          <h4>Confirmed Orders</h4>
+          <div class="stat-value" id="statConfirmedCount">48</div>
+          <a href="#">View Details →</a>
+        </div>
+        <div class="stat-card">
+          <h4>Today's Revenue</h4>
+          <div class="stat-value">₹3,45,000</div>
+          <a href="#">View Details →</a>
+        </div>
+        <div class="stat-card">
+          <h4>Total Customers</h4>
+          <div class="stat-value">126</div>
+          <a href="#">View Details →</a>
+        </div>
+      </div>
+
+      <!-- Recent Booking Requests (Connected with Customer Site) -->
+      <section id="requests-section" class="panel-box">
+        <div class="panel-header">
+          <h3>Recent Booking Requests (Live Customer Sync)</h3>
+          <button class="btn-sm" onclick="clearAllRequests()">Clear Processed</button>
+        </div>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Member ID</th>
+              <th>Customer</th>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Mudra</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="vendorRequestsTable">
+            <!-- Dynamic sync data will load here -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Revenue Chart & Analytics Section -->
+      <div class="charts-grid">
+        <div class="panel-box">
+          <h3>Orders Overview</h3>
+          <canvas id="ordersPieChart" height="200"></canvas>
+        </div>
+        <div class="panel-box">
+          <h3>Revenue Overview</h3>
+          <canvas id="revenueLineChart" height="200"></canvas>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script src="vendor-app.js"></script>
+</body>
+</html>
