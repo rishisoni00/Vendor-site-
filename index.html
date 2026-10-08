@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seeti Pro</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/material-darker.min.css">
+<style>
+:root{--bg:#0e0e12;--panel:#15151c;--border:#23232f;--text:#e4e4e7;--muted:#9f9fa9;--accent:#6366f1}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;height:100vh;overflow:hidden}
+#dashboard{display:flex;flex-direction:column;height:100vh}
+.dash-header{height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--panel)}
+.logo-wrap{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+.logo-wrap img{width:32px;height:32px;border-radius:8px}
+.dash-grid{padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;overflow:auto}
+.project-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:0.2s}
+.project-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.project-card h3{font-size:14px;margin-bottom:6px}
+.project-card p{font-size:12px;color:var(--muted)}
+.card-actions{margin-top:12px;display:flex;gap:8px}
+.btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:12px;cursor:pointer}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:white}
+#editor-view{display:none;height:100vh;flex-direction:column}
+.editor-header{height:52px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:12px}
+.editor-header img{width:28px;height:28px;border-radius:6px}
+.tabs{display:flex;gap:4px}
+.tab{padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;color:var(--muted);border:1px solid transparent}
+.tab.active{background:var(--bg);color:var(--text);border-color:var(--border)}
+.main{display:flex;flex:1;overflow:hidden}
+.code-area{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border)}
+.CodeMirror{flex:1;height:auto!important;font-size:14px}
+.preview-area{flex:1;background:white;display:flex;flex-direction:column}
+.preview-area iframe{flex:1;border:0;width:100%}
+</style>
+</head>
+<body>
+<div id="dashboard">
+  <div class="dash-header">
+    <div class="logo-wrap"><img src="logo.png" alt="Seeti"><span>Seeti Pro</span></div>
+    <button class="btn btn-primary" onclick="createNew()">+ New Project</button>
+  </div>
+  <div class="dash-grid" id="grid"></div>
+</div>
+
+<div id="editor-view">
+  <div class="editor-header">
+    <img src="logo.png" alt="logo">
+    <button class="btn" onclick="goDashboard()">Projects</button>
+    <div class="tabs">
+      <div class="tab active" data-lang="html" onclick="switchLang('html')">HTML</div>
+      <div class="tab" data-lang="css" onclick="switchLang('css')">CSS</div>
+      <div class="tab" data-lang="js" onclick="switchLang('js')">JS</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="saveProject()">Save</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="code-area"><textarea id="code"></textarea></div>
+    <div class="preview-area"><iframe id="preview"></iframe></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/xml/xml.min.js"></script>
+<script>
+let projects = JSON.parse(localStorage.getItem('seeti_projects')||'[]');
+let currentId = null;
+let currentLang = 'html';
+let cm = CodeMirror.fromTextArea(document.getElementById('code'),{theme:'material-darker',lineNumbers:true,mode:'htmlmixed'});
+function renderGrid(){
+  const grid=document.getElementById('grid');
+  if(projects.length===0){grid.innerHTML='<p style="color:var(--muted)">No projects yet. Create new.</p>';return}
+  grid.innerHTML=projects.map(p=>`<div class="project-card"><h3>${p.name}</h3><p>${new Date(p.updatedAt).toLocaleString()}</p><div class="card-actions"><button class="btn btn-primary" onclick="openProject('${p.id}')">Open</button><button class="btn" onclick="deleteProject('${p.id}')">Delete</button></div></div>`).join('');
+}
+function createNew(){const id=Date.now().toString();const newP={id,name:'Untitled-'+id.slice(-4),html:'<h1>Hello Seeti</h1>',css:'h1{color:#6366f1}',js:'console.log("pro")',updatedAt:Date.now()};projects.unshift(newP);persist();openProject(id);}
+function openProject(id){currentId=id;document.getElementById('dashboard').style.display='none';document.getElementById('editor-view').style.display='flex';switchLang('html');}
+function goDashboard(){saveProject();document.getElementById('dashboard').style.display='flex';document.getElementById('editor-view').style.display='none';renderGrid();}
+function switchLang(lang){currentLang=lang;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.lang===lang));const p=projects.find(x=>x.id===currentId);if(!p) return;const modeMap={html:'htmlmixed',css:'css',js:'javascript'};cm.setOption('mode',modeMap[lang]);cm.setValue(p[lang]||'');cm.clearHistory();updatePreview();}
+function saveProject(){if(!currentId) return;const p=projects.find(x=>x.id===currentId);p[currentLang]=cm.getValue();p.updatedAt=Date.now();persist();updatePreview();}
+function updatePreview(){const p=projects.find(x=>x.id===currentId);if(!p) return;document.getElementById('preview').srcdoc=`<style>${p.css||''}</style>${p.html||''}<script>${p.js||''}<\/script>`;}
+function persist(){localStorage.setItem('seeti_projects',JSON.stringify(projects));}
+function deleteProject(id){if(confirm('Delete?')){projects=projects.filter(x=>x.id!==id);persist();renderGrid();}}
+cm.on('change',()=>{clearTimeout(window._t);window._t=setTimeout(saveProject,800);});
+renderGrid();
+</script>
+</body>
+</html>
